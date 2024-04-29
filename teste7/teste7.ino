@@ -23,7 +23,6 @@ void loop() {
 
   Serial.write(telegram, 7);
 
-  Serial.flush();
 
   digitalWrite(8, LOW);
 
