@@ -21,7 +21,7 @@ class ActionButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
-          height: 50.0,
+          height: 40.0,
           child: Center(
             child: Text(
               text,

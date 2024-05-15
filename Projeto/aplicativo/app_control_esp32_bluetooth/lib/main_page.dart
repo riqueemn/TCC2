@@ -129,15 +129,15 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+          toolbarHeight: 20, 
         //centerTitle: true,
-        //title: const Text('Flutter ❤️ Arduino'),
+        //title: const Text('Teste'),
       ),
       body: Column(
         children: [
           _controlBT(),
           _infoDevice(),
           Expanded(child: _listDevices()),
-          //_inputSerial(),
           _buttons(),
         ],
       ),
@@ -217,24 +217,43 @@ class _MainPageState extends State<MainPage> {
 
   Widget _buttons() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
       color: Colors.black12,
       child: Column(
         children: [
-          const SizedBox(height: 16.0),
+          const SizedBox(height: 10.0),
           
           Row(
             children: [
               Expanded(
                 child: ActionButton(
                   text: "Enviar",
-                  color: Colors.green,
+                  color: Colors.blue,
                   onTap: () => _sendData(_currentValue.toString()+"/"+_firstMarkerValue.toString()+"/"+_secondMarkerValue.toString()+"\n"),
                 ),
               ),
-              const SizedBox(width: 8.0),
-              Text(_currentValue.toString(), style: TextStyle(fontSize: 20)),
-          Slider(
+              Expanded(
+                child: ActionButton(
+                  text: "Ligar",
+                  color: Colors.green,
+                  onTap: () => _sendData('1'),
+                ),
+              ),
+              Expanded(
+                child: ActionButton(
+                  text: "Desligar",
+                  color: Colors.red,
+                  onTap: () => _sendData('2'),
+                ),
+              ),
+        ],
+          ),
+          Row(
+            children: [
+          Text(_currentValue.toString(), style: TextStyle(fontSize: 12)),
+          Container(
+              width: 300,
+              child:Slider(
           value: _currentValue,
           min: 0,
           max: 60,
@@ -247,7 +266,7 @@ class _MainPageState extends State<MainPage> {
               _currentValue = value;
             });
           },
-        ),
+        )),
           
         ],
           ),
@@ -258,7 +277,7 @@ class _MainPageState extends State<MainPage> {
             title: GaugeTitle(
                 text: 'Ângulo',
                 textStyle: TextStyle(
-                    fontSize: 15,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                     fontFamily: 'Arial'),

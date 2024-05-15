@@ -1,18 +1,18 @@
 #define SERIAL2_RX_PIN 16
 #define SERIAL2_TX_PIN 17
 #define LED 2
-#define TRANC_485 8
+#define TRANC_485 22
 
 uint8_t valor_lido;
 char retorno_MODBUS;
 
-uint8_t buffer[8] = {};
-uint8_t buffer_rec[16] = {};
+uint8_t buffer[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+uint8_t buffer_rec[16] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
 void setup() {
   Serial.begin(9600);
-  //Serial2.begin(9600, SERIAL_8E1, SERIAL2_RX_PIN, SERIAL2_TX_PIN);
-  Serial2.begin(9600);
+  Serial2.begin(9600, SERIAL_8E1, SERIAL2_RX_PIN, SERIAL2_TX_PIN);
+  //Serial2.begin(9600);
   pinMode(LED, OUTPUT);
   pinMode(TRANC_485, OUTPUT);
 }
