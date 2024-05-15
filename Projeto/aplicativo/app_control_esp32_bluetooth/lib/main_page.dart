@@ -236,14 +236,14 @@ class _MainPageState extends State<MainPage> {
                 child: ActionButton(
                   text: "Ligar",
                   color: Colors.green,
-                  onTap: () => _sendData("Ligar\n"),
+                  onTap: () => _sendData('1'),
                 ),
               ),
               Expanded(
                 child: ActionButton(
                   text: "Desligar",
                   color: Colors.red,
-                  onTap: () => _sendData("Desligar\n"),
+                  onTap: () => _sendData('2'),
                 ),
               ),
         ],
