@@ -229,21 +229,22 @@ class _MainPageState extends State<MainPage> {
                 child: ActionButton(
                   text: "Enviar",
                   color: Colors.blue,
-                  onTap: () => _sendData(_currentValue.toString()+"/"+_firstMarkerValue.toString()+"/"+_secondMarkerValue.toString()+"\n"),
+                  //onTap: () => _sendData(_currentValue.toString()+"/"+_firstMarkerValue.toString()+"/"+_secondMarkerValue.toString()+"\n"),
+                  onTap: () => _sendData(_currentValue.toString()),
                 ),
               ),
               Expanded(
                 child: ActionButton(
                   text: "Ligar",
                   color: Colors.green,
-                  onTap: () => _sendData('1'),
+                  onTap: () => _sendData("LIGAR"),
                 ),
               ),
               Expanded(
                 child: ActionButton(
                   text: "Desligar",
                   color: Colors.red,
-                  onTap: () => _sendData('2'),
+                  onTap: () => _sendData("DESLIGAR"),
                 ),
               ),
         ],

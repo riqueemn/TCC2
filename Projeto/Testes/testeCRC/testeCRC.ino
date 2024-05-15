@@ -84,14 +84,17 @@ void gira(){
 }
 
 void velocidadeDoMotor(int velocidade){
+
+  int v = (velocidade * 8192)/60;
+  
   digitalWrite(22, HIGH);
 
   telegram[0] = 0x01; // Endereço do escravo
   telegram[1] = 0x06; // Função
   telegram[2] = 0x02; // MEI Type
   telegram[3] = 0xAB; // Código de leitura
-  telegram[4] = 0x05; // Código de leitura
-  telegram[5] = 0x00; // Número do Objeto
+  telegram[4] = (v >> 8) & 0xFF; // Código de leitura
+  telegram[5] = v & 0xFF; // Número do Objeto
 
 
 
@@ -119,6 +122,6 @@ uint8_t* unsignedShortToHex(unsigned short num) {
 void loop() {
 
   gira();
-  velocidadeDoMotor(3000);
+  velocidadeDoMotor(40);
 
 }
