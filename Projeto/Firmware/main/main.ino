@@ -1,7 +1,16 @@
+#include "BluetoothSerial.h"
 #include "REG_CFW100.h"
 #include <ModbusMaster.h>
 
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
 ModbusMaster node;
+BluetoothSerial SerialBT;
+
+char c;
+String strVelocidade = "";
 
 #define MAX485_DE 22
 #define SERIAL_RX_PIN 16
@@ -273,15 +282,19 @@ void setup(){
     Serial1.begin(9600, SERIAL_8E1, SERIAL_RX_PIN, SERIAL_TX_PIN);
     pinMode(MAX485_DE, OUTPUT);
 
+    SerialBT.begin("ESP32");
+
     digitalWrite(MAX485_DE, 0);
 }
 
 void loop(){
+  /*
   Start(ID_METER, REG_ADDR_WRITE[0]);
   SetVelocity(ID_METER, REG_ADDR_WRITE[1], 50);
   delay(5000);
   Emergency_Stop(ID_METER, REG_ADDR_WRITE[0]);
   delay(10000);
+  */
   
   /*Start(ID_METER, REG_ADDR_WRITE[0]);
   SetVelocity(ID_METER, REG_ADDR_WRITE[1], 50);
@@ -290,4 +303,27 @@ void loop(){
   delay(10000);*/
 
   //Write_Multiple_Register(ID_METER, 682);
+
+  while(SerialBT.available()){
+      c = (char)SerialBT.read();
+
+      strVelocidade += c; 
+  }
+
+  if(strVelocidade.length() > 0){ 
+    if(strVelocidade == "START"){
+      Start(ID_METER, REG_ADDR_WRITE[0]);
+    } else if(strVelocidade == "STOP"){
+      Stop(ID_METER, REG_ADDR_WRITE[0]);
+    } else if(strVelocidade == "EMERGENCY_STOP"){
+      Emergency_Stop(ID_METER, REG_ADDR_WRITE[0]);
+    } else{
+      int v = strVelocidade.toInt();
+      Serial.println(v);
+     
+      SetVelocity(ID_METER, REG_ADDR_WRITE[1], v);
+    }
+
+    strVelocidade = "";
+  }
 }
