@@ -25,7 +25,7 @@ class ActionButton extends StatelessWidget {
           child: Center(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 10.0, color: Colors.white),
+              style: const TextStyle(fontSize: 14.0, color: Colors.white),
             ),
           ),
         ),

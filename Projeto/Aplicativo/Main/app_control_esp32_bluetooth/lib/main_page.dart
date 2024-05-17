@@ -227,7 +227,7 @@ class _MainPageState extends State<MainPage> {
             children: [
               Expanded(
                 child: ActionButton(
-                  text: "Enviar",
+                  text: "Send",
                   color: Colors.blue,
                   //onTap: () => _sendData(_currentValue.toString()+"/"+_firstMarkerValue.toString()+"/"+_secondMarkerValue.toString()+"\n"),
                   onTap: () => _sendData(_currentValue.toString()),
@@ -235,20 +235,34 @@ class _MainPageState extends State<MainPage> {
               ),
               Expanded(
                 child: ActionButton(
-                  text: "Ligar",
+                  text: "Start",
                   color: Colors.green,
-                  onTap: () => _sendData("LIGAR"),
-                ),
-              ),
-              Expanded(
-                child: ActionButton(
-                  text: "Desligar",
-                  color: Colors.red,
-                  onTap: () => _sendData("DESLIGAR"),
+                  onTap: () => _sendData("START"),
                 ),
               ),
         ],
           ),
+          Container(
+            margin: EdgeInsets.all(10), 
+            child: Row(
+                children:[
+                  Expanded(
+                    child: ActionButton(
+                      text: "Stop",
+                      color: Colors.orange,
+                      onTap: () => _sendData("STOP"),
+                    ),
+                  ),
+                  Expanded(
+                    child: ActionButton(
+                      text: "Emergency Stop",
+                      color: Colors.red,
+                      onTap: () => _sendData("EMERGENCY_STOP")
+                    ),
+                  ),              
+                ]
+              ),
+            ),
           Row(
             children: [
           Text(_currentValue.toString(), style: TextStyle(fontSize: 12)),
