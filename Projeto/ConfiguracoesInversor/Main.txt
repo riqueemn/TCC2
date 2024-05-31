@@ -1,0 +1,25 @@
+
+////////// Configurações Iniciais ///////////
+
+P133 -- 0.0 Hz => //Frequência Mínima
+P134 -- 20.0 Hz => //Frequência Máxima
+
+/////////// Comando Remoto ///////////
+
+P204 -- 5 => //Reset de Fábrica
+P220 -- 1 => //Fonte Sempre Remoto
+P222 -- 4 => //FI
+//P230 -- 1 => //Fonte Sempre Remoto
+P263 -- 9 => //Fonte Sempre Remoto
+P264 -- 0 => //Fonte Sempre Remoto
+P265 -- 11 => //Acelera E.P
+P266 -- 12 => //Desacelera E.P
+
+
+/////////// Comunicação RS485 ///////////
+
+P310 -- 1 => //Taxa de Comunicação Serial
+P682 -- 0x0003 //Gira o motor e Habilita Geral o drive
+P682 -- 0x0000 //Para o motor e Desabilita Geral o drive
+P682 -- 0x0040 //Parada rápida ou Emergência
+P683 -- 4096 //Referência de Velocidade Via Serial
