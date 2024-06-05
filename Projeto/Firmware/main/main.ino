@@ -13,16 +13,19 @@ BluetoothSerial SerialBT;
 char c;
 String strVelocidade = "";
 
-#define MAX485_DE_RE 22  // DE e RE
+#define MAX485_RE 19  // RE
+#define MAX485_DE 18  // DE
 #define SERIAL_RX_PIN 16  // RO
 #define SERIAL_TX_PIN 17  // DI
 
 void preTransmission(){
-    digitalWrite(MAX485_DE_RE, 1);
+    digitalWrite(MAX485_DE, 1);
+    digitalWrite(MAX485_RE, 1);
 }
 
 void postTransmission(){
-    digitalWrite(MAX485_DE_RE, 0);
+    digitalWrite(MAX485_DE, 0);
+    digitalWrite(MAX485_RE, 0);
 }
 
 float HexToFloat(uint32_t x){
@@ -260,13 +263,14 @@ void setup(){
     pinMode(MAX485_DE_RE, OUTPUT);
 
     SerialBT.begin("ESP32");
-
-    digitalWrite(MAX485_DE_RE, 0);
+    
+    digitalWrite(MAX485_DE, 0);
+    digitalWrite(MAX485_RE, 0);
 }
 
 void loop(){
 
   //ExecMedida();
-  //ControleBluetooth();
-  Teste();
+  ControleBluetooth();
+  //Teste();
 }
