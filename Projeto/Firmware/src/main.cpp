@@ -260,7 +260,8 @@ void ControleBluetooth(){
 void setup(){
     Serial.begin(9600);
     Serial1.begin(9600, SERIAL_8E1, SERIAL_RX_PIN, SERIAL_TX_PIN);
-    pinMode(MAX485_DE_RE, OUTPUT);
+    pinMode(MAX485_DE, OUTPUT);
+    pinMode(MAX485_RE, OUTPUT);
 
     SerialBT.begin("ESP32");
     
