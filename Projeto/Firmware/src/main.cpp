@@ -2,21 +2,42 @@
 #include "BluetoothSerial.h"
 #include "REG_CFW100.h"
 #include <ModbusMaster.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-ModbusMaster node;
-BluetoothSerial SerialBT;
-
-char c;
-String strVelocidade = "";
-
 #define MAX485_RE 19  // RE
 #define MAX485_DE 18  // DE
 #define SERIAL_RX_PIN 16  // RO
 #define SERIAL_TX_PIN 17  // DI
+
+struct Automacao_Triciclo{
+  bool isConnected;
+  bool isTest;
+
+};
+
+bool isTest = true;
+
+
+ModbusMaster node;
+BluetoothSerial SerialBT;
+LiquidCrystal_I2C lcd(0x27, 16, 4);
+
+
+char c;
+String strVelocidade = "";
+bool isConnected;
+
+
+
+
+
 
 void preTransmission(){
     digitalWrite(MAX485_DE, 1);
@@ -88,6 +109,9 @@ float Read_Meter_Float(char addr, uint16_t REG){
 }
 
 void Start(char addr, uint16_t REG){
+    lcd.clear();
+    lcd.print("Start");
+
     float i = 0;
     uint8_t result, j;
 
@@ -109,6 +133,9 @@ void Start(char addr, uint16_t REG){
 
 
 void Stop(char addr, uint16_t REG){
+    lcd.clear();
+    lcd.print("Stop");
+
     float i = 0;
     uint8_t result, j;
 
@@ -155,6 +182,9 @@ void Write_Multiple_Register(char addr, uint16_t REG){
 }
 
 void Emergency_Stop(char addr, uint16_t REG){
+    lcd.clear();
+    lcd.print("Emergency Stop");
+
     float i = 0;
     uint8_t result, j;
 
@@ -257,21 +287,78 @@ void ControleBluetooth(){
   }
 }
 
+void StatusCarregandoDisplay(){
+	lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Desconectado...");
+  
+  int i = 0;
+  int l = 6;
+  
+  while(!isConnected){
+    isConnected = SerialBT.connected();
+    if(i < l){
+      lcd.setCursor(i, 1);
+    	lcd.print("|");
+    }else if(i < 16){
+      lcd.setCursor(i-l+1, 1);
+      for(int k=0; k<l; k++){
+        lcd.print("|");
+      }
+      lcd.setCursor(i-l, 1);
+      lcd.print(" ");
+    } else {
+      lcd.setCursor(i-l, 1);
+      lcd.print(" ");
+    }
+      
+    delay(500);
+    i++;
+    if(i >= (15+l+1)){
+     	i = 0;
+    }
+  }
+  lcd.clear();
+  lcd.print("Conexao Aceita");
+  delay(4000);
+  lcd.clear();
+  lcd.print("Controle");
+  lcd.setCursor(0, 1);
+  lcd.print("Liberado");
+}
+
+void StatusDisplay(String s){
+  lcd.print(s);
+}
+
 void setup(){
     Serial.begin(9600);
     Serial1.begin(9600, SERIAL_8E1, SERIAL_RX_PIN, SERIAL_TX_PIN);
     pinMode(MAX485_DE, OUTPUT);
     pinMode(MAX485_RE, OUTPUT);
 
-    SerialBT.begin("ESP32");
+    SerialBT.begin("AUTOMACAO_TRICICLO");
+    
     
     digitalWrite(MAX485_DE, 0);
     digitalWrite(MAX485_RE, 0);
+
+    lcd.init();
+	  lcd.backlight();
 }
 
 void loop(){
-
   //ExecMedida();
-  ControleBluetooth();
+  
   //Teste();
+  if(isTest){
+    Teste();
+  }else {
+    isConnected = SerialBT.connected();
+    if(!isConnected){
+      StatusCarregandoDisplay();
+    } else {
+      ControleBluetooth();  
+    }
+  }
 }
