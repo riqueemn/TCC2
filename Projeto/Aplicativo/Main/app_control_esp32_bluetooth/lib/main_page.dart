@@ -9,9 +9,6 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:flutter/widgets.dart';
 
-
-
-
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -20,12 +17,10 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-
   double _currentValue = 0;
   double _firstMarkerValue = 20;
   double _secondMarkerValue = 80;
   double _value = 0.5;
-
 
   final _bluetooth = FlutterBluetoothSerial.instance;
   bool _bluetoothState = false;
@@ -129,13 +124,13 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          toolbarHeight: 20, 
+        toolbarHeight: 20,
         //centerTitle: true,
         //title: const Text('Teste'),
       ),
       body: Column(
         children: [
-          _controlBT(),
+          //_controlBT(),
           _infoDevice(),
           Expanded(child: _listDevices()),
           _buttons(),
@@ -197,7 +192,8 @@ class _MainPageState extends State<MainPage> {
                           onPressed: () async {
                             setState(() => _isConnecting = true);
 
-                            _connection = await BluetoothConnection.toAddress(device.address);
+                            _connection = await BluetoothConnection.toAddress(
+                                device.address);
                             _deviceConnected = device;
                             _devices = [];
                             _isConnecting = false;
@@ -215,6 +211,37 @@ class _MainPageState extends State<MainPage> {
           );
   }
 
+  Widget button1(){
+    return Container(
+    width: 250,
+    child: Slider(
+      value: _currentValue,
+      min: 0,
+      max: 10,
+      divisions: 100,
+      label: _currentValue.toString(),
+      activeColor: Colors.blue,
+      thumbColor: Colors.red,
+      onChanged: (value) {
+        setState(() {
+          _currentValue = value;
+        });
+      },
+    ));
+  }
+
+  Widget button2(){
+    return
+    Container(
+        width: 20,
+        child: TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Password',
+            )));
+}
+
   Widget _buttons() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
@@ -222,7 +249,6 @@ class _MainPageState extends State<MainPage> {
       child: Column(
         children: [
           const SizedBox(height: 10.0),
-          
           Row(
             children: [
               Expanded(
@@ -240,106 +266,86 @@ class _MainPageState extends State<MainPage> {
                   onTap: () => _sendData("START"),
                 ),
               ),
-        ],
+            ],
           ),
           Container(
-            margin: EdgeInsets.all(10), 
-            child: Row(
-                children:[
-                  Expanded(
-                    child: ActionButton(
-                      text: "Stop",
-                      color: Colors.orange,
-                      onTap: () => _sendData("STOP"),
-                    ),
-                  ),
-                  Expanded(
-                    child: ActionButton(
-                      text: "Emergency Stop",
-                      color: Colors.red,
-                      onTap: () => _sendData("EMERGENCY_STOP")
-                    ),
-                  ),              
-                ]
+            margin: EdgeInsets.all(10),
+            child: Row(children: [
+              Expanded(
+                child: ActionButton(
+                  text: "Stop",
+                  color: Colors.orange,
+                  onTap: () => _sendData("STOP"),
+                ),
               ),
-            ),
+              Expanded(
+                child: ActionButton(
+                    text: "Emergency Stop",
+                    color: Colors.red,
+                    onTap: () => _sendData("EMERGENCY_STOP")),
+              ),
+            ]),
+          ),
           Row(
             children: [
-          Text(_currentValue.toString(), style: TextStyle(fontSize: 12)),
-          Container(
-              width: 300,
-              child:Slider(
-          value: _currentValue,
-          min: 0,
-          max: 60,
-          divisions: 10,
-          label: _currentValue.toString(),
-          activeColor: Colors.blue,
-          thumbColor: Colors.red,
-          onChanged: (value) {
-            setState(() {
-              _currentValue = value;
-            });
-          },
-        )),
-          
-        ],
+              Text(_currentValue.toString(), style: TextStyle(fontSize: 12)),
+              //button2(),
+              button1()
+            ],
           ),
           Container(
-        height: 300,
-        width: 300,
-        child: SfRadialGauge(
-            title: GaugeTitle(
-                text: 'Ângulo',
-                textStyle: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontFamily: 'Arial'),
-                alignment: GaugeAlignment.near),
-            axes: <RadialAxis>[
-              RadialAxis(
-                minimum: 0,
-                maximum: 360,
-                interval: 10,
-                minorTicksPerInterval: 10,
-                startAngle: 250,
-                endAngle: 250,
-                pointers: <GaugePointer>[
-                  MarkerPointer(
-                    value: _firstMarkerValue,
-                    markerHeight: 20,
-                    markerWidth: 20,
-                    enableDragging: true,
-                    markerType: MarkerType.circle,
-                    onValueChanged: _handleFirstPointerValueChanged,
-                    onValueChanging: _handleFirstPointerValueChanging,
-                  ),
-                  MarkerPointer(
-                    value: _secondMarkerValue,
-                    markerHeight: 20,
-                    markerWidth: 20,
-                    enableDragging: true,
-                    markerType: MarkerType.circle,
-                    onValueChanged: _handleSecondPointerValueChanged,
-                    onValueChanging: _handleSecondPointerValueChanging,
+            height: 300,
+            width: 300,
+            child: SfRadialGauge(
+                title: GaugeTitle(
+                    text: 'Ângulo',
+                    textStyle: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontFamily: 'Arial'),
+                    alignment: GaugeAlignment.near),
+                axes: <RadialAxis>[
+                  RadialAxis(
+                    minimum: 0,
+                    maximum: 360,
+                    interval: 10,
+                    minorTicksPerInterval: 10,
+                    startAngle: 250,
+                    endAngle: 250,
+                    pointers: <GaugePointer>[
+                      MarkerPointer(
+                        value: _firstMarkerValue,
+                        markerHeight: 20,
+                        markerWidth: 20,
+                        enableDragging: true,
+                        markerType: MarkerType.circle,
+                        onValueChanged: _handleFirstPointerValueChanged,
+                        onValueChanging: _handleFirstPointerValueChanging,
+                      ),
+                      MarkerPointer(
+                        value: _secondMarkerValue,
+                        markerHeight: 20,
+                        markerWidth: 20,
+                        enableDragging: true,
+                        markerType: MarkerType.circle,
+                        onValueChanged: _handleSecondPointerValueChanged,
+                        onValueChanging: _handleSecondPointerValueChanging,
+                      )
+                    ],
+                    ranges: <GaugeRange>[
+                      GaugeRange(
+                          startValue: _firstMarkerValue,
+                          endValue: _secondMarkerValue,
+                          sizeUnit: GaugeSizeUnit.factor,
+                          startWidth: 0.06,
+                          endWidth: 0.06)
+                    ],
                   )
-                ],
-                ranges: <GaugeRange>[
-                  GaugeRange(
-                      startValue: _firstMarkerValue,
-                      endValue: _secondMarkerValue,
-                      sizeUnit: GaugeSizeUnit.factor,
-                      startWidth: 0.06,
-                      endWidth: 0.06)
-                ],
-              )
-            ]),
-      ),
-      
+                ]),
+          ),
         ],
       ),
-      
     );
   }
 }

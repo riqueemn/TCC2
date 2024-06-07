@@ -33,6 +33,7 @@ bool isTest = false;
 bool isConfig = false;
 int typeConfig = 1;
 bool isReset = false;
+float frequencia = 0;
 
 ModbusMaster node;
 BluetoothSerial SerialBT;
@@ -244,7 +245,7 @@ void Write_Multiple_Register(char addr, uint16_t REG)
   //}
 }
 
-void SetVelocity(char addr, uint16_t REG, int vel)
+void SetVelocity(char addr, uint16_t REG, float vel)
 {
   float i = 0;
   uint8_t result, j;
@@ -328,11 +329,12 @@ void ControleBluetooth()
     else if (strVelocidade == "EMERGENCY_STOP")
     {
       Emergency_Stop();
+    
     }
     else
     {
-      int v = strVelocidade.toInt();
-      SetVelocity(ID_INVERSOR, REG_ADDR_WRITE[1], v);
+      frequencia = strVelocidade.toFloat();
+      SetVelocity(ID_INVERSOR, REG_ADDR_WRITE[1], frequencia);
     }
 
     strVelocidade = "";
@@ -410,7 +412,9 @@ void setup()
 }
 
 void loop()
-{
+{ 
+
+  Serial.print(String(frequencia)+"\n");
   if (!isConfig)
   {
     Config();
@@ -440,3 +444,4 @@ void loop()
     }
   }
 }
+
