@@ -41,6 +41,7 @@ dependencies:
   flutter_bluetooth_serial: ^0.4.0
   syncfusion_flutter_sliders: ^25.1.42
   syncfusion_flutter_gauges: ^25.1.42
+  flutter_spinbox: ^0.13.1
 
 dev_dependencies:
   flutter_test:

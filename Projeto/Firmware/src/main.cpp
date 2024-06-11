@@ -197,6 +197,14 @@ void Config()
   lcd.print("Configurando...");
   lcd.setCursor(0, 2);
 
+  WriteSingleRegister(399, 78.2, "399");
+  WriteSingleRegister(400, 220, "400");
+  WriteSingleRegister(401, 1.77, "401");
+  WriteSingleRegister(402, 1700, "402");
+  WriteSingleRegister(403, 60, "403");
+  WriteSingleRegister(404, 3, "404");
+  WriteSingleRegister(407, 0.7, "407");
+  
   if (typeConfig == 0)
   {
     ConfigControlBornes();
