@@ -10,7 +10,6 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinbox/material.dart'; // or flutter_spinbox.dart for both
 
-
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -213,56 +212,93 @@ class _MainPageState extends State<MainPage> {
           );
   }
 
-  Widget button1(){
-    return Container(
-    width: 250,
-    child: Slider(
-      value: _currentValue,
-      min: 0,
-      max: 10,
-      divisions: 100,
-      label: _currentValue.toString(),
-      activeColor: Colors.blue,
-      thumbColor: Colors.red,
-      onChanged: (value) {
-        setState(() {
-          _currentValue = value;
-        });
-      },
-    ));
+  Widget Send() {
+    return Expanded(
+      child: ActionButton(
+        text: "Send",
+        color: Colors.blue,
+        onTap: () => _sendData(_currentValue.toString()),
+      ),
+    );
   }
 
-  Widget button2(){
-    return
-    Container(
-        width: 20,
-        child: TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
-            )));
-}
+  Widget GenericButton(String s, Color c) {
+    return Expanded(
+      child: ActionButton(
+        text: s,
+        color: c,
+        onTap: () => _sendData(s),
+      ),
+    );
+  }
 
-  Widget button3(){
-    return
-    Container(
+  Widget AlterarFrequencia() {
+    return Container(
         width: 300,
         child: SpinBox(
-  min: 0.0,
-  max: 30.0,
-  step: 0.1,
-  decimals: 1,
-  value: _currentValue,
-  onChanged: (value) {
-    print(value);
-    setState(() {
-          _currentValue = value;
-    });
-    },
-)
-            );
-}
+          min: 0.0,
+          max: 30.0,
+          step: 0.1,
+          decimals: 1,
+          value: _currentValue,
+          onChanged: (value) {
+            print(value);
+            setState(() {
+              _currentValue = value;
+            });
+          },
+        ));
+  }
+
+  Widget AnguloRotacao() {
+    return SfRadialGauge(
+        title: GaugeTitle(
+            text: 'Ângulo',
+            textStyle: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: 'Arial'),
+            alignment: GaugeAlignment.near),
+        axes: <RadialAxis>[
+          RadialAxis(
+            minimum: 0,
+            maximum: 360,
+            interval: 10,
+            minorTicksPerInterval: 10,
+            startAngle: 250,
+            endAngle: 250,
+            pointers: <GaugePointer>[
+              MarkerPointer(
+                value: _firstMarkerValue,
+                markerHeight: 20,
+                markerWidth: 20,
+                enableDragging: true,
+                markerType: MarkerType.circle,
+                onValueChanged: _handleFirstPointerValueChanged,
+                onValueChanging: _handleFirstPointerValueChanging,
+              ),
+              MarkerPointer(
+                value: _secondMarkerValue,
+                markerHeight: 20,
+                markerWidth: 20,
+                enableDragging: true,
+                markerType: MarkerType.circle,
+                onValueChanged: _handleSecondPointerValueChanged,
+                onValueChanging: _handleSecondPointerValueChanging,
+              )
+            ],
+            ranges: <GaugeRange>[
+              GaugeRange(
+                  startValue: _firstMarkerValue,
+                  endValue: _secondMarkerValue,
+                  sizeUnit: GaugeSizeUnit.factor,
+                  startWidth: 0.06,
+                  endWidth: 0.06)
+            ],
+          )
+        ]);
+  }
 
   Widget _buttons() {
     return Container(
@@ -272,101 +308,19 @@ class _MainPageState extends State<MainPage> {
         children: [
           const SizedBox(height: 10.0),
           Row(
-            children: [
-              Expanded(
-                child: ActionButton(
-                  text: "Send",
-                  color: Colors.blue,
-                  //onTap: () => _sendData(_currentValue.toString()+"/"+_firstMarkerValue.toString()+"/"+_secondMarkerValue.toString()+"\n"),
-                  onTap: () => _sendData(_currentValue.toString()),
-                ),
-              ),
-              Expanded(
-                child: ActionButton(
-                  text: "Start",
-                  color: Colors.green,
-                  onTap: () => _sendData("START"),
-                ),
-              ),
-            ],
+            children: [Send(), GenericButton("START", Colors.green), GenericButton("REVERSAO", Colors.grey)],
           ),
-          Container(
-            margin: EdgeInsets.all(10),
-            child: Row(children: [
-              Expanded(
-                child: ActionButton(
-                  text: "Stop",
-                  color: Colors.orange,
-                  onTap: () => _sendData("STOP"),
-                ),
-              ),
-              Expanded(
-                child: ActionButton(
-                    text: "Emergency Stop",
-                    color: Colors.red,
-                    onTap: () => _sendData("EMERGENCY_STOP")),
-              ),
-            ]),
-          ),
+          const SizedBox(height: 10.0),
+          Row(children: [
+            GenericButton("STOP", Colors.orange),
+            GenericButton("EMERGENCY_STOP", Colors.red)
+          ]),
           Row(
             children: [
-              //Text(_currentValue.toString(), style: TextStyle(fontSize: 12)),
-              //button2(),
-              //button1()
-              button3(),
+             Center(child: AlterarFrequencia(),) 
             ],
           ),
-          Container(
-            height: 300,
-            width: 300,
-            child: SfRadialGauge(
-                title: GaugeTitle(
-                    text: 'Ângulo',
-                    textStyle: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontFamily: 'Arial'),
-                    alignment: GaugeAlignment.near),
-                axes: <RadialAxis>[
-                  RadialAxis(
-                    minimum: 0,
-                    maximum: 360,
-                    interval: 10,
-                    minorTicksPerInterval: 10,
-                    startAngle: 250,
-                    endAngle: 250,
-                    pointers: <GaugePointer>[
-                      MarkerPointer(
-                        value: _firstMarkerValue,
-                        markerHeight: 20,
-                        markerWidth: 20,
-                        enableDragging: true,
-                        markerType: MarkerType.circle,
-                        onValueChanged: _handleFirstPointerValueChanged,
-                        onValueChanging: _handleFirstPointerValueChanging,
-                      ),
-                      MarkerPointer(
-                        value: _secondMarkerValue,
-                        markerHeight: 20,
-                        markerWidth: 20,
-                        enableDragging: true,
-                        markerType: MarkerType.circle,
-                        onValueChanged: _handleSecondPointerValueChanged,
-                        onValueChanging: _handleSecondPointerValueChanging,
-                      )
-                    ],
-                    ranges: <GaugeRange>[
-                      GaugeRange(
-                          startValue: _firstMarkerValue,
-                          endValue: _secondMarkerValue,
-                          sizeUnit: GaugeSizeUnit.factor,
-                          startWidth: 0.06,
-                          endWidth: 0.06)
-                    ],
-                  )
-                ]),
-          ),
+          Container(height: 300, width: 300, child: AnguloRotacao()),
         ],
       ),
     );
