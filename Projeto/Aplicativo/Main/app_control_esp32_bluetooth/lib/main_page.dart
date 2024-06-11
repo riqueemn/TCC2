@@ -8,6 +8,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_spinbox/material.dart'; // or flutter_spinbox.dart for both
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -17,7 +19,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  double _currentValue = 0;
+  double _currentValue = 4;
   double _firstMarkerValue = 20;
   double _secondMarkerValue = 80;
   double _value = 0.5;
@@ -242,6 +244,26 @@ class _MainPageState extends State<MainPage> {
             )));
 }
 
+  Widget button3(){
+    return
+    Container(
+        width: 300,
+        child: SpinBox(
+  min: 0.0,
+  max: 30.0,
+  step: 0.1,
+  decimals: 1,
+  value: _currentValue,
+  onChanged: (value) {
+    print(value);
+    setState(() {
+          _currentValue = value;
+    });
+    },
+)
+            );
+}
+
   Widget _buttons() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
@@ -288,9 +310,10 @@ class _MainPageState extends State<MainPage> {
           ),
           Row(
             children: [
-              Text(_currentValue.toString(), style: TextStyle(fontSize: 12)),
+              //Text(_currentValue.toString(), style: TextStyle(fontSize: 12)),
               //button2(),
-              button1()
+              //button1()
+              button3(),
             ],
           ),
           Container(
