@@ -18,8 +18,12 @@ struct Automacao_Triciclo
 {
   bool isConnected = false;
   bool isTest = false;
-  bool isConfig = false;
-  bool isReset = false;
+  bool isConfig = true;
+  bool isReset = true;
+  bool sentidoGiro = 1;
+
+  int typeConfig = 1;
+  float frequencia = 0;
 
   String strVelocidade = "";
   char c;
@@ -34,6 +38,7 @@ bool isConfig = false;
 int typeConfig = 1;
 bool isReset = false;
 float frequencia = 0;
+bool sentidoGiro = 1;
 
 ModbusMaster node;
 BluetoothSerial SerialBT;
@@ -144,9 +149,34 @@ void WriteSingleRegister(uint16_t REG, uint16_t value, String s)
   //}
 }
 
+void WriteSingleRegister2(uint16_t REG, uint16_t value)
+{
+  float i = 0;
+  uint8_t result, j;
+  uint16_t data[2];
+  node.begin(ID_INVERSOR, Serial1);
+  node.preTransmission(preTransmission);
+  node.postTransmission(postTransmission);
+  // if(REG != 12) {
+  result = node.writeSingleRegister(REG, value);
+  delay(100);
+  if (result != node.ku8MBSuccess)
+  {
+    Error(REG);
+  }
+  //}
+}
+
 void Start()
 {
-  WriteSingleRegister(REG_ADDR_WRITE[0], 0x0003, "Start");
+  if (sentidoGiro)
+  {
+    WriteSingleRegister(REG_ADDR_WRITE[0], 0x0007, "Start");
+  }
+  else
+  {
+    WriteSingleRegister(REG_ADDR_WRITE[0], 0x0003, "Start Reversao");
+  }
 }
 
 void Stop()
@@ -159,30 +189,52 @@ void Emergency_Stop()
   WriteSingleRegister(REG_ADDR_WRITE[0], 64, "Emergency Stop");
 }
 
+void Reversao()
+{
+  Emergency_Stop();
+  sentidoGiro = !sentidoGiro;
+}
+
 void ConfigControlBornes()
 {
-  WriteSingleRegister(220, 1, "220");
-  WriteSingleRegister(222, 7, "222");
-  WriteSingleRegister(227, 1, "227");
-  WriteSingleRegister(308, 1, "308");
-  WriteSingleRegister(310, 0, "310");
-  WriteSingleRegister(263, 1, "263");
-  WriteSingleRegister(264, 11, "264");
-  WriteSingleRegister(265, 12, "265");
-  WriteSingleRegister(266, 5, "266");
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Configurando");
+  lcd.setCursor(0, 1);
+  lcd.print("Modo Serial");
+  lcd.setCursor(0, 2);
+
+  for (int i = 0; i < 9; i++)
+  {
+    WriteSingleRegister2(REG_ADDR_CONFIG[i], REG_ADDR_CONFIG_VALUE_2[i]);
+    lcd.setCursor(i, 2);
+    lcd.print("|");
+    lcd.setCursor(0, 3);
+    lcd.print(String(i * 10) + "%");
+
+    delay(100);
+  }
 }
 
 void ConfigControlSerial()
 {
-  WriteSingleRegister(220, 1, "220");
-  WriteSingleRegister(222, 9, "222");
-  WriteSingleRegister(227, 2, "227");
-  WriteSingleRegister(308, 1, "308");
-  WriteSingleRegister(310, 0, "310");
-  WriteSingleRegister(263, 1, "263");
-  WriteSingleRegister(264, 8, "264");
-  WriteSingleRegister(265, 0, "265");
-  WriteSingleRegister(266, 0, "266");
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Configurando");
+  lcd.setCursor(0, 1);
+  lcd.print("Modo Serial");
+  lcd.setCursor(0, 2);
+
+  for (int i = 0; i < 10; i++)
+  {
+    WriteSingleRegister2(REG_ADDR_CONFIG[i], REG_ADDR_CONFIG_VALUE_1[i]);
+    lcd.setCursor(i, 2);
+    lcd.print("|");
+    lcd.setCursor(0, 3);
+    lcd.print(String(i * 10) + "%");
+
+    delay(100);
+  }
 }
 
 void Reset()
@@ -194,17 +246,17 @@ void Reset()
 void Config()
 {
   Stop();
+  lcd.clear();
   lcd.print("Configurando...");
-  lcd.setCursor(0, 2);
 
-  WriteSingleRegister(399, 78.2, "399");
-  WriteSingleRegister(400, 220, "400");
-  WriteSingleRegister(401, 1.77, "401");
-  WriteSingleRegister(402, 1700, "402");
-  WriteSingleRegister(403, 60, "403");
-  WriteSingleRegister(404, 3, "404");
-  WriteSingleRegister(407, 0.7, "407");
-  
+  WriteSingleRegister2(399, 78.2);
+  WriteSingleRegister2(400, 220);
+  WriteSingleRegister2(401, 1.77);
+  WriteSingleRegister2(402, 1700);
+  WriteSingleRegister2(403, 60);
+  WriteSingleRegister2(404, 3);
+  WriteSingleRegister2(407, 0.7);
+
   if (typeConfig == 0)
   {
     ConfigControlBornes();
@@ -216,14 +268,10 @@ void Config()
 
   isConfig = true;
 
+  lcd.clear();
+
   delay(1000);
 }
-
-
-
-
-
-
 
 void Write_Multiple_Register(char addr, uint16_t REG)
 {
@@ -337,7 +385,10 @@ void ControleBluetooth()
     else if (strVelocidade == "EMERGENCY_STOP")
     {
       Emergency_Stop();
-    
+    }
+    else if (strVelocidade == "REVERSAO")
+    {
+      Reversao();
     }
     else
     {
@@ -405,8 +456,8 @@ void StatusDisplay(String s)
 
 void setup()
 {
-  Serial.begin(9600);
-  Serial1.begin(9600, SERIAL_8E1, SERIAL_RX_PIN, SERIAL_TX_PIN);
+  Serial.begin(19200);
+  Serial1.begin(19200, SERIAL_8E1, SERIAL_RX_PIN, SERIAL_TX_PIN);
   pinMode(MAX485_DE, OUTPUT);
   pinMode(MAX485_RE, OUTPUT);
 
@@ -420,18 +471,19 @@ void setup()
 }
 
 void loop()
-{ 
-
-  Serial.print(String(frequencia)+"\n");
-  if (!isConfig)
-  {
-    Config();
-  }
+{
 
   if (isReset)
   {
     Reset();
   }
+
+  if (!isConfig)
+  {
+    Config();
+  }
+
+  
   else
   {
     if (isTest)
@@ -440,6 +492,7 @@ void loop()
     }
     else
     {
+
       isConnected = SerialBT.connected();
       if (!isConnected)
       {
@@ -452,4 +505,3 @@ void loop()
     }
   }
 }
-
