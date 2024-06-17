@@ -25,7 +25,7 @@ struct Automacao_Triciclo
   int typeConfig = 1;
   float frequencia = 0;
 
-  String strVelocidade = "";
+  String strCMD = "";
   char c;
 
   LiquidCrystal_I2C lcd();
@@ -45,7 +45,7 @@ BluetoothSerial SerialBT;
 LiquidCrystal_I2C lcd(0x27, 16, 4);
 
 char c;
-String strVelocidade = "";
+String strCMD = "";
 bool isConnected;
 
 void preTransmission()
@@ -197,6 +197,8 @@ void Reversao()
 
 void ConfigControlBornes()
 {
+  Stop();
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Configurando");
@@ -218,6 +220,9 @@ void ConfigControlBornes()
 
 void ConfigControlSerial()
 {
+  Stop();
+
+
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Configurando");
@@ -235,6 +240,7 @@ void ConfigControlSerial()
 
     delay(100);
   }
+
 }
 
 void Reset()
@@ -256,6 +262,8 @@ void Config()
   WriteSingleRegister2(403, 60);
   WriteSingleRegister2(404, 3);
   WriteSingleRegister2(407, 0.7);
+  WriteSingleRegister2(134, 150);
+  WriteSingleRegister2(120, 0);
 
   if (typeConfig == 0)
   {
@@ -369,34 +377,40 @@ void ControleBluetooth()
   {
     c = (char)SerialBT.read();
 
-    strVelocidade += c;
+    strCMD += c;
   }
 
-  if (strVelocidade.length() > 0)
+  if (strCMD.length() > 0)
   {
-    if (strVelocidade == "START")
+    if (strCMD == "START")
     {
       Start();
     }
-    else if (strVelocidade == "STOP")
+    else if (strCMD == "STOP")
     {
       Stop();
     }
-    else if (strVelocidade == "EMERGENCY_STOP")
+    else if (strCMD == "EMERGENCY_STOP")
     {
       Emergency_Stop();
     }
-    else if (strVelocidade == "REVERSAO")
+    else if (strCMD == "REVERSAO")
     {
       Reversao();
+    } else if (strCMD == "MODO_QUADRO")
+    {
+      ConfigControlBornes();
+    } else if (strCMD == "MODO_APP")
+    {
+      ConfigControlSerial();
     }
     else
     {
-      frequencia = strVelocidade.toFloat();
+      frequencia = strCMD.toFloat();
       SetVelocity(ID_INVERSOR, REG_ADDR_WRITE[1], frequencia);
     }
 
-    strVelocidade = "";
+    strCMD = "";
   }
 }
 
@@ -492,11 +506,11 @@ void loop()
     }
     else
     {
-
       isConnected = SerialBT.connected();
       if (!isConnected)
       {
         StatusCarregandoDisplay();
+        Emergency_Stop();
       }
       else
       {

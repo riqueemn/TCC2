@@ -22,6 +22,7 @@ class _MainPageState extends State<MainPage> {
   double _firstMarkerValue = 20;
   double _secondMarkerValue = 80;
   double _value = 0.5;
+  bool _currentMode = true;
 
   final _bluetooth = FlutterBluetoothSerial.instance;
   bool _bluetoothState = false;
@@ -31,7 +32,7 @@ class _MainPageState extends State<MainPage> {
   BluetoothDevice? _deviceConnected;
   int times = 0;
 
-  /// Update the first thumb value to the range.
+
   void _handleFirstPointerValueChanged(double value) {
     if (value < _secondMarkerValue) {
       setState(() {
@@ -40,8 +41,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  /// Cancel the dragging when pointer value reaching the axis end/start value, greater/less than another.
-  /// pointer value.
+  
   void _handleFirstPointerValueChanging(ValueChangingArgs args) {
     if (args.value < _secondMarkerValue) {
       _firstMarkerValue = args.value;
@@ -50,8 +50,7 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  /// Cancel the dragging when pointer value reaching the axis end/start value, greater/less than another.
-  /// pointer value.
+
   void _handleSecondPointerValueChanging(ValueChangingArgs args) {
     if (_firstMarkerValue < args.value) {
       _secondMarkerValue = args.value;
@@ -237,17 +236,40 @@ class _MainPageState extends State<MainPage> {
         width: 300,
         child: SpinBox(
           min: 0.0,
-          max: 30.0,
+          max: 15.0,
           step: 0.1,
           decimals: 1,
           value: _currentValue,
           onChanged: (value) {
-            print(value);
             setState(() {
               _currentValue = value;
             });
           },
         ));
+  }
+
+  Widget switchMode(){
+
+    return Expanded(
+      child:
+        Switch.adaptive(
+          // Don't use the ambient CupertinoThemeData to style this switch.
+          applyCupertinoTheme: false,
+          value: _currentMode,
+          onChanged: (bool value) {
+            setState(() {
+              _currentMode = value;
+            });
+
+            if(_currentMode){
+              _sendData("MODO_APP");
+            } else {
+              _sendData("MODO_QUADRO");
+            }
+          },
+        ),
+    );
+  
   }
 
   Widget AnguloRotacao() {
@@ -314,7 +336,14 @@ class _MainPageState extends State<MainPage> {
           Row(children: [
             GenericButton("STOP", Colors.orange),
             GenericButton("EMERGENCY_STOP", Colors.red)
-          ]),
+          ]),          const SizedBox(height: 10.0),
+
+          Row(children: [
+            //GenericButton("CONTROLE_QUADRO", Colors.brown),
+            //GenericButton("CONTROLE_APP", Colors.indigo)
+            switchMode()
+          ]),          const SizedBox(height: 10.0),
+
           Row(
             children: [
              Center(child: AlterarFrequencia(),) 
