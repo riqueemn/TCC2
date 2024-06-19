@@ -166,7 +166,7 @@ void Stop()
 
 void Emergency_Stop()
 {
-  WriteSingleRegister(REG_ADDR_WRITE[0], 64, "Emergency Stop");
+  WriteSingleRegister(REG_ADDR_WRITE[0], 0x0040, "Emergency Stop");
 }
 
 void Reversao()
