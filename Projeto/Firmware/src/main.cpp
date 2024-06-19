@@ -60,26 +60,6 @@ void postTransmission()
   digitalWrite(MAX485_RE, 0);
 }
 
-float HexToFloat(uint32_t x)
-{
-  return (*(float *)&x);
-}
-
-float FloatToHex(float x)
-{
-  return (*(uint32_t *)&x);
-}
-
-float UintToInt(uint64_t x)
-{
-  return (*(int64_t *)&x);
-}
-
-float HexToDouble(uint32_t x)
-{
-  return (*(double *)&x);
-}
-
 void Error(uint16_t REG)
 {
   Serial.print("Falha na Conexão modbus. REG >>> ");
@@ -354,7 +334,7 @@ void ExecMedida()
   Serial.println(" A");
   Serial.print("");
 
-  delay(10000);
+  delay(1000);
 }
 
 void Teste()
@@ -456,7 +436,7 @@ void StatusCarregandoDisplay()
   }
   lcd.clear();
   lcd.print("Conexao Aceita");
-  delay(2000);
+  delay(1000);
   lcd.clear();
   lcd.print("Controle");
   lcd.setCursor(0, 1);
