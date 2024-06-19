@@ -18,11 +18,17 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  double _currentValue = 4;
+  double _currentValue = 3;
   double _firstMarkerValue = 20;
   double _secondMarkerValue = 80;
   double _value = 0.5;
   bool _currentMode = true;
+  bool _onPressedGenericButton = false;
+  bool _onPressedEmergencyButton = false;
+  bool _onPressedSendButton = false;
+  bool _onPressedStartButton = false;
+  bool _onPressedStopButton = false;
+  bool _onPressedReversaoButton = false;
 
   final _bluetooth = FlutterBluetoothSerial.instance;
   bool _bluetoothState = false;
@@ -32,7 +38,7 @@ class _MainPageState extends State<MainPage> {
   BluetoothDevice? _deviceConnected;
   int times = 0;
 
-
+  /// Update the first thumb value to the range.
   void _handleFirstPointerValueChanged(double value) {
     if (value < _secondMarkerValue) {
       setState(() {
@@ -41,7 +47,8 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  
+  /// Cancel the dragging when pointer value reaching the axis end/start value, greater/less than another.
+  /// pointer value.
   void _handleFirstPointerValueChanging(ValueChangingArgs args) {
     if (args.value < _secondMarkerValue) {
       _firstMarkerValue = args.value;
@@ -50,7 +57,8 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-
+  /// Cancel the dragging when pointer value reaching the axis end/start value, greater/less than another.
+  /// pointer value.
   void _handleSecondPointerValueChanging(ValueChangingArgs args) {
     if (_firstMarkerValue < args.value) {
       _secondMarkerValue = args.value;
@@ -211,34 +219,161 @@ class _MainPageState extends State<MainPage> {
           );
   }
 
+
+  void InitState(){
+    _onPressedSendButton = false;
+    _onPressedReversaoButton = false;
+    _onPressedStartButton = false;
+    _onPressedStopButton = false;
+    _onPressedEmergencyButton = false;
+  }
+
   Widget Send() {
     return Expanded(
-      child: ActionButton(
-        text: "Send",
-        color: Colors.blue,
-        onTap: () => _sendData(_currentValue.toString()),
+      child: FloatingActionButton(
+        backgroundColor: Colors.blue,
+        splashColor: Colors.black,
+        onPressed: () { 
+            setState(() {
+              InitState();
+              _onPressedSendButton = !_onPressedSendButton;
+            });
+
+            _sendData(_currentValue.toString());
+          },
+        child: Text("SEND"),
+        shape: _onPressedSendButton ? 
+           RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(color: Colors.white, width: 2)
+        ) : null
       ),
     );
   }
 
-  Widget GenericButton(String s, Color c) {
+  Widget GenericButton(String s, Color c, bool state) {
     return Expanded(
-      child: ActionButton(
-        text: s,
-        color: c,
-        onTap: () => _sendData(s),
+      child: FloatingActionButton(
+        backgroundColor: c,
+        splashColor: Colors.black,
+        onPressed: () { 
+          setState(() {
+            state = !state;
+          });
+          _sendData(s);
+        },
+        child: Text(s),
+        shape: state ? 
+          Border.all(width: 2.0, color: const Color(0xFFFFFFFF)) : null
+      ),
+    );
+  }
+
+  Widget Start(String s, Color c) {
+    return Expanded(
+      child: FloatingActionButton(
+        backgroundColor: c,
+        splashColor: Colors.black,
+        onPressed: () { 
+          setState(() {
+            InitState();
+            _onPressedStartButton = !_onPressedStartButton;
+          });
+          _sendData(s);
+        },
+        child: Text(s),
+        shape: _onPressedStartButton ? 
+           RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(color: Colors.white, width: 2)
+        ) : null
+      ),
+    );
+  }
+
+  
+  Widget Stop(String s, Color c) {
+    return Expanded(
+      child: FloatingActionButton(
+        backgroundColor: c,
+        splashColor: Colors.black,
+        onPressed: () { 
+          setState(() {
+            InitState();
+            _onPressedStopButton = !_onPressedStopButton;
+          });
+          _sendData(s);
+        },
+        child: Text(s),
+        shape: _onPressedStopButton ? 
+           RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(color: Colors.white, width: 2)
+        ) : null
+      ),
+    );
+  }
+
+  
+  Widget Reversao(String s, Color c) {
+    return Expanded(
+      child: FloatingActionButton(
+        backgroundColor: c,
+        splashColor: Colors.black,
+        onPressed: () { 
+          setState(() {
+            InitState();
+            _onPressedReversaoButton = !_onPressedReversaoButton;
+          });
+          _sendData(s);
+        },
+        child: Text(s),
+        shape: _onPressedReversaoButton ? 
+           RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(color: Colors.white, width: 2)
+        ) : null
+      ),
+    );
+  }
+
+  Widget EmergencyButton() {
+    return Expanded(
+      
+      child: FloatingActionButton(
+        backgroundColor: Colors.red,
+        splashColor: Colors.black,
+        onPressed: () {
+
+
+            _sendData("EMERGENCY_STOP");
+            setState(() {
+              InitState();
+              _currentValue = 3;
+              _onPressedEmergencyButton = !_onPressedEmergencyButton;
+            });
+
+
+          },
+        child: Text("EMERGÊNCIA"),
+        shape: _onPressedEmergencyButton ? 
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(color: Colors.white, width: 2)
+        ) : null
       ),
     );
   }
 
   Widget AlterarFrequencia() {
     return Container(
-        width: 300,
+        width: 180,
         child: SpinBox(
           min: 0.0,
           max: 15.0,
           step: 0.1,
           decimals: 1,
+          
           value: _currentValue,
           onChanged: (value) {
             setState(() {
@@ -249,11 +384,9 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget switchMode(){
-
     return Expanded(
       child:
         Switch.adaptive(
-          // Don't use the ambient CupertinoThemeData to style this switch.
           applyCupertinoTheme: false,
           value: _currentMode,
           onChanged: (bool value) {
@@ -269,7 +402,6 @@ class _MainPageState extends State<MainPage> {
           },
         ),
     );
-  
   }
 
   Widget AnguloRotacao() {
@@ -330,26 +462,25 @@ class _MainPageState extends State<MainPage> {
         children: [
           const SizedBox(height: 10.0),
           Row(
-            children: [Send(), GenericButton("START", Colors.green), GenericButton("REVERSAO", Colors.grey)],
+            children: [Send(), SizedBox(width: 10), Start("START", Colors.green), SizedBox(width: 10), Reversao("REVERSAO", Colors.grey)],
           ),
           const SizedBox(height: 10.0),
           Row(children: [
-            GenericButton("STOP", Colors.orange),
-            GenericButton("EMERGENCY_STOP", Colors.red)
-          ]),          const SizedBox(height: 10.0),
-
-          Row(children: [
-            //GenericButton("CONTROLE_QUADRO", Colors.brown),
-            //GenericButton("CONTROLE_APP", Colors.indigo)
-            switchMode()
-          ]),          const SizedBox(height: 10.0),
-
+            Stop("STOP", Colors.orange),
+            SizedBox(width: 10),
+            EmergencyButton()
+          ]),
+          const SizedBox(height: 10.0),
           Row(
             children: [
-             Center(child: AlterarFrequencia(),) 
+             Center(child: AlterarFrequencia(),),
+             SizedBox(width: 10),
+             Text("Quadro"),
+            switchMode() ,
+            Text("App")
             ],
           ),
-          Container(height: 300, width: 300, child: AnguloRotacao()),
+          Container(height: 260, width: 260, child: AnguloRotacao()),
         ],
       ),
     );
