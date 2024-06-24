@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:ffi';
 
+import 'package:flutter/services.dart';
+
 import 'widgets/action_button.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +19,18 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
-  double _currentValue = 4;
+class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
+  double _currentValue = 3;
   double _firstMarkerValue = 20;
   double _secondMarkerValue = 80;
   double _value = 0.5;
   bool _currentMode = true;
+  bool _onPressedGenericButton = false;
+  bool _onPressedEmergencyButton = false;
+  bool _onPressedSendButton = false;
+  bool _onPressedStartButton = false;
+  bool _onPressedStopButton = false;
+  bool _onPressedReversaoButton = false;
 
   final _bluetooth = FlutterBluetoothSerial.instance;
   bool _bluetoothState = false;
@@ -32,6 +40,49 @@ class _MainPageState extends State<MainPage> {
   BluetoothDevice? _deviceConnected;
   int times = 0;
 
+  @override
+  void initState() {
+    WidgetsBinding.instance!.addObserver(this);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    
+    super.initState();
+
+    _requestPermission();
+
+    _bluetooth.state.then((state) {
+      setState(() => _bluetoothState = state.isEnabled);
+    });
+
+    _bluetooth.onStateChanged().listen((state) {
+      switch (state) {
+        case BluetoothState.STATE_OFF:
+          setState(() => _bluetoothState = false);
+          break;
+        case BluetoothState.STATE_ON:
+          setState(() => _bluetoothState = true);
+          break;
+        // case BluetoothState.STATE_TURNING_OFF:
+        //   break;
+        // case BluetoothState.STATE_TURNING_ON:
+        //   break;
+      }
+    });
+  }
+
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
+
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      _sendData("EMERGENCY_STOP");
+
+      _connection?.finish();
+      _bluetooth.requestDisable();
+      setState(() => _deviceConnected = null);
+    }
+  }
 
   void _handleFirstPointerValueChanged(double value) {
     if (value < _secondMarkerValue) {
@@ -41,7 +92,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  
   void _handleFirstPointerValueChanging(ValueChangingArgs args) {
     if (args.value < _secondMarkerValue) {
       _firstMarkerValue = args.value;
@@ -49,7 +99,6 @@ class _MainPageState extends State<MainPage> {
       args.cancel = true;
     }
   }
-
 
   void _handleSecondPointerValueChanging(ValueChangingArgs args) {
     if (_firstMarkerValue < args.value) {
@@ -59,7 +108,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  /// Update the second thumb value to the range.
   void _handleSecondPointerValueChanged(double value) {
     if (_firstMarkerValue < value) {
       setState(() {
@@ -92,32 +140,6 @@ class _MainPageState extends State<MainPage> {
     await Permission.bluetooth.request();
     await Permission.bluetoothScan.request();
     await Permission.bluetoothConnect.request();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _requestPermission();
-
-    _bluetooth.state.then((state) {
-      setState(() => _bluetoothState = state.isEnabled);
-    });
-
-    _bluetooth.onStateChanged().listen((state) {
-      switch (state) {
-        case BluetoothState.STATE_OFF:
-          setState(() => _bluetoothState = false);
-          break;
-        case BluetoothState.STATE_ON:
-          setState(() => _bluetoothState = true);
-          break;
-        // case BluetoothState.STATE_TURNING_OFF:
-        //   break;
-        // case BluetoothState.STATE_TURNING_ON:
-        //   break;
-      }
-    });
   }
 
   @override
@@ -211,29 +233,142 @@ class _MainPageState extends State<MainPage> {
           );
   }
 
+  void InitState() {
+    _onPressedSendButton = false;
+    _onPressedReversaoButton = false;
+    _onPressedStartButton = false;
+    _onPressedStopButton = false;
+    _onPressedEmergencyButton = false;
+  }
+
   Widget Send() {
     return Expanded(
-      child: ActionButton(
-        text: "Send",
-        color: Colors.blue,
-        onTap: () => _sendData(_currentValue.toString()),
-      ),
+      child: FloatingActionButton(
+          backgroundColor: Colors.blue,
+          splashColor: Colors.black,
+          onPressed: () {
+            setState(() {
+              InitState();
+              _onPressedSendButton = !_onPressedSendButton;
+            });
+
+            _sendData(_currentValue.toString());
+          },
+          child: Text("SEND"),
+          shape: _onPressedSendButton
+              ? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(color: Colors.white, width: 2))
+              : null),
     );
   }
 
-  Widget GenericButton(String s, Color c) {
+  Widget GenericButton(String s, Color c, bool state) {
     return Expanded(
-      child: ActionButton(
-        text: s,
-        color: c,
-        onTap: () => _sendData(s),
-      ),
+      child: FloatingActionButton(
+          backgroundColor: c,
+          splashColor: Colors.black,
+          onPressed: () {
+            setState(() {
+              state = !state;
+            });
+            _sendData(s);
+          },
+          child: Text(s),
+          shape: state
+              ? Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
+              : null),
+    );
+  }
+
+  Widget Start(String s, Color c) {
+    return Expanded(
+      child: FloatingActionButton(
+          backgroundColor: c,
+          splashColor: Colors.black,
+          onPressed: () {
+            setState(() {
+              InitState();
+              _onPressedStartButton = !_onPressedStartButton;
+            });
+            _sendData(s);
+          },
+          child: Text(s),
+          shape: _onPressedStartButton
+              ? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(color: Colors.white, width: 2))
+              : null),
+    );
+  }
+
+  Widget Stop(String s, Color c) {
+    return Expanded(
+      child: FloatingActionButton(
+          backgroundColor: c,
+          splashColor: Colors.black,
+          onPressed: () {
+            setState(() {
+              InitState();
+              _onPressedStopButton = !_onPressedStopButton;
+            });
+            _sendData(s);
+          },
+          child: Text(s),
+          shape: _onPressedStopButton
+              ? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(color: Colors.white, width: 2))
+              : null),
+    );
+  }
+
+  Widget Reversao(String s, Color c) {
+    return Expanded(
+      child: FloatingActionButton(
+          backgroundColor: c,
+          splashColor: Colors.black,
+          onPressed: () {
+            setState(() {
+              InitState();
+              _onPressedReversaoButton = !_onPressedReversaoButton;
+            });
+            _sendData(s);
+          },
+          child: Text(s),
+          shape: _onPressedReversaoButton
+              ? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(color: Colors.white, width: 2))
+              : null),
+    );
+  }
+
+  Widget EmergencyButton() {
+    return Expanded(
+      child: FloatingActionButton(
+          backgroundColor: Colors.red,
+          splashColor: Colors.black,
+          onPressed: () {
+            _sendData("EMERGENCY_STOP");
+            setState(() {
+              InitState();
+              _currentValue = 3;
+              _onPressedEmergencyButton = !_onPressedEmergencyButton;
+            });
+          },
+          child: Text("EMERGÊNCIA"),
+          shape: _onPressedEmergencyButton
+              ? RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(color: Colors.white, width: 2))
+              : null),
     );
   }
 
   Widget AlterarFrequencia() {
     return Container(
-        width: 300,
+        width: 180,
         child: SpinBox(
           min: 0.0,
           max: 15.0,
@@ -248,28 +383,24 @@ class _MainPageState extends State<MainPage> {
         ));
   }
 
-  Widget switchMode(){
-
+  Widget switchMode() {
     return Expanded(
-      child:
-        Switch.adaptive(
-          // Don't use the ambient CupertinoThemeData to style this switch.
-          applyCupertinoTheme: false,
-          value: _currentMode,
-          onChanged: (bool value) {
-            setState(() {
-              _currentMode = value;
-            });
+      child: Switch.adaptive(
+        applyCupertinoTheme: false,
+        value: _currentMode,
+        onChanged: (bool value) {
+          setState(() {
+            _currentMode = value;
+          });
 
-            if(_currentMode){
-              _sendData("MODO_APP");
-            } else {
-              _sendData("MODO_QUADRO");
-            }
-          },
-        ),
+          if (_currentMode) {
+            _sendData("MODO_APP");
+          } else {
+            _sendData("MODO_QUADRO");
+          }
+        },
+      ),
     );
-  
   }
 
   Widget AnguloRotacao() {
@@ -330,26 +461,33 @@ class _MainPageState extends State<MainPage> {
         children: [
           const SizedBox(height: 10.0),
           Row(
-            children: [Send(), GenericButton("START", Colors.green), GenericButton("REVERSAO", Colors.grey)],
+            children: [
+              Send(),
+              SizedBox(width: 10),
+              Start("START", Colors.green),
+              SizedBox(width: 10),
+              Reversao("REVERSAO", Colors.grey)
+            ],
           ),
           const SizedBox(height: 10.0),
           Row(children: [
-            GenericButton("STOP", Colors.orange),
-            GenericButton("EMERGENCY_STOP", Colors.red)
-          ]),          const SizedBox(height: 10.0),
-
-          Row(children: [
-            //GenericButton("CONTROLE_QUADRO", Colors.brown),
-            //GenericButton("CONTROLE_APP", Colors.indigo)
-            switchMode()
-          ]),          const SizedBox(height: 10.0),
-
+            Stop("STOP", Colors.orange),
+            SizedBox(width: 10),
+            EmergencyButton()
+          ]),
+          const SizedBox(height: 10.0),
           Row(
             children: [
-             Center(child: AlterarFrequencia(),) 
+              Center(
+                child: AlterarFrequencia(),
+              ),
+              SizedBox(width: 10),
+              Text("Quadro"),
+              switchMode(),
+              Text("App")
             ],
           ),
-          Container(height: 300, width: 300, child: AnguloRotacao()),
+          Container(height: 260, width: 260, child: AnguloRotacao()),
         ],
       ),
     );
